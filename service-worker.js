@@ -1,5 +1,6 @@
-const CACHE_NAME = 'sudoku-v1';
-const urlsToCache = [
+// Versioned cache name to ensure updates are picked up on deploy
+const CACHE_VERSION = 'sudoku-v2'; // bump this on future releases
+const CORE_ASSETS = [
   '/',
   '/index.html',
   '/styles.css',
@@ -8,44 +9,80 @@ const urlsToCache = [
   '/manifest.json'
 ];
 
-// Install service worker and cache resources
 self.addEventListener('install', event => {
+  // Activate new service worker as soon as it's finished installing
+  self.skipWaiting();
+  // Pre-cache core assets so app works offline
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_VERSION).then(cache => cache.addAll(CORE_ASSETS))
   );
 });
 
-// Fetch from cache, fallback to network
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
-  );
-});
-
-// Clean up old caches
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+  // Take control of uncontrolled clients immediately
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.map(k => {
+          if (k !== CACHE_VERSION) return caches.delete(k);
         })
       );
-    })
+      await self.clients.claim();
+    })()
+  );
+});
+
+// Utility to respond network-first for navigation and core assets
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE_VERSION);
+  try {
+    const response = await fetch(request);
+    // Update cache with fresh response
+    if (response && response.status === 200) {
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (err) {
+    // Network failed, try cache
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw err;
+  }
+}
+
+// Cache-first strategy for other assets
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE_VERSION);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (response && response.status === 200) {
+    cache.put(request, response.clone());
+  }
+  return response;
+}
+
+self.addEventListener('fetch', event => {
+  const req = event.request;
+  const url = new URL(req.url);
+
+  // Only handle same-origin requests for core assets
+  if (req.method !== 'GET') return;
+
+  // Network-first for navigation requests (index) and core assets
+  if (req.mode === 'navigate' ||
+      CORE_ASSETS.includes(url.pathname) ||
+      url.pathname.endsWith('/index.html') ||
+      url.pathname === '/' ) {
+    event.respondWith(
+      networkFirst(req).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // For other requests, use cache-first to improve offline performance
+  event.respondWith(
+    cacheFirst(req).catch(() => fetch(req))
   );
 });

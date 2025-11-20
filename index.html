@@ -43,6 +43,26 @@
 
     <script src="sudoku-generator.js"></script>
     <script src="app.js"></script>
+    <!-- Unregister old service workers on load (hotfix to ensure fresh assets) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+          try {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            for (const reg of regs) {
+              await reg.unregister();
+              console.log('Service worker unregistered (hotfix):', reg);
+            }
+            // Optional: reload so the page loads latest network assets
+            if (regs.length) {
+              window.location.reload(true);
+            }
+          } catch (err) {
+            console.warn('Failed to unregister service workers:', err);
+          }
+        });
+      }
+    </script>
     <script>
         // Register service worker
         if ('serviceWorker' in navigator) {
