@@ -61,22 +61,43 @@ class SudokuGame {
             }
         });
 
-        // Number pad for touch input (delegated)
-        const numberPad = document.getElementById('number-pad');
-        if (numberPad) {
-            numberPad.addEventListener('click', (e) => {
-                const btn = e.target.closest('.num-btn');
-                if (!btn) return;
-                const num = parseInt(btn.dataset.number, 10);
-                if (isNaN(num)) return;
-                if (!this.selectedCell) {
-                    this._flashSelectCellMessage();
-                    return;
+        // Number pad for touch input (robust delegated handler)
+        const instance = this;
+        document.addEventListener('click', function delegatedNumPadHandler(e) {
+            const btn = e.target && e.target.closest && e.target.closest('.num-btn');
+            if (!btn) return;
+            const appEl = document.getElementById('app');
+            if (!appEl || !appEl.contains(btn)) return; // ignore clicks outside the app
+
+            const num = parseInt(btn.dataset.number, 10);
+            if (isNaN(num)) return;
+
+            // If instance isn't ready, attempt global fallback
+            if (!instance || typeof instance.handleNumberInput !== 'function') {
+                if (window.__sudoku && typeof window.__sudoku.handleNumberInput === 'function') {
+                    try { window.__sudoku.handleNumberInput(num); } catch (err) { console.error(err); }
                 }
-                // delegate to existing handler
-                this.handleNumberInput(num);
-            });
-        }
+                return;
+            }
+
+            // If no cell selected, prompt user
+            if (!instance.selectedCell) {
+                if (typeof instance._flashSelectCellMessage === 'function') {
+                    instance._flashSelectCellMessage();
+                } else {
+                    const msg = document.getElementById('game-message');
+                    if (msg) { msg.textContent = 'Select a cell first'; msg.className = 'message warning'; setTimeout(() => { msg.textContent = ''; msg.className = 'message'; }, 1200); }
+                }
+                return;
+            }
+
+            // Otherwise handle number input normally
+            try {
+                instance.handleNumberInput(num);
+            } catch (err) {
+                console.error('Number pad handler error', err);
+            }
+        });
 
         // Setup debug banner dismiss button
         const debugDismiss = document.getElementById('debug-dismiss');
