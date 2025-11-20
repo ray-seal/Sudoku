@@ -58,8 +58,49 @@ class SudokuGame {
             }
         });
 
+        // Setup number pad buttons
+        const numberPad = document.getElementById('number-pad');
+        if (numberPad) {
+            numberPad.addEventListener('click', (e) => {
+                const btn = e.target.closest('.number-btn');
+                if (!btn) return;
+                
+                const number = parseInt(btn.dataset.number);
+                
+                if (this.selectedCell) {
+                    this.handleNumberInput(number);
+                } else {
+                    // Flash animation to indicate no cell is selected
+                    this.flashNoCellSelected();
+                }
+            });
+        }
+
         // Load and display leaderboard
         this.displayLeaderboard();
+    }
+
+    flashNoCellSelected() {
+        const numberPad = document.getElementById('number-pad');
+        const messageEl = document.getElementById('game-message');
+        
+        // Add shake animation to number pad
+        numberPad.classList.add('shake');
+        setTimeout(() => {
+            numberPad.classList.remove('shake');
+        }, 500);
+        
+        // Show temporary message
+        const originalClass = messageEl.className;
+        const originalText = messageEl.textContent;
+        
+        messageEl.textContent = 'Please select a cell first';
+        messageEl.className = 'message error';
+        
+        setTimeout(() => {
+            messageEl.textContent = originalText;
+            messageEl.className = originalClass;
+        }, 2000);
     }
 
     startGame(difficulty) {

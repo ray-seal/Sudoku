@@ -256,6 +256,52 @@ body {
     color: #721c24;
 }
 
+/* Number Pad */
+.number-pad {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.number-btn {
+    padding: 15px;
+    font-size: 1.3em;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.number-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.number-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.number-btn.clear-btn {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+}
+
+.number-pad.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
 /* Responsive Design */
 @media (max-width: 600px) {
     body {
@@ -287,10 +333,24 @@ body {
         width: 100%;
         justify-content: space-between;
     }
+
+    .number-pad {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 10px 0;
+        margin-top: 10px;
+        z-index: 10;
+    }
 }
 
 @media (max-width: 400px) {
     .cell {
         font-size: 1em;
+    }
+
+    .number-btn {
+        padding: 12px;
+        font-size: 1.1em;
     }
 }
