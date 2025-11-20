@@ -390,5 +390,14 @@ class SudokuGame {
 
 // Initialize the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new SudokuGame();
+    const sudokuInstance = new SudokuGame();
+    // Expose instance and a safe global start function as a fallback
+    window.__sudoku = sudokuInstance;
+    window.startGame = (difficulty) => {
+        if (window.__sudoku && typeof window.__sudoku.startGame === 'function') {
+            window.__sudoku.startGame(difficulty);
+        } else {
+            console.warn('Sudoku instance not ready — try again shortly.');
+        }
+    };
 });
