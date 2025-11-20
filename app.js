@@ -78,6 +78,15 @@ class SudokuGame {
             });
         }
 
+        // Setup debug banner dismiss button
+        const debugDismiss = document.getElementById('debug-dismiss');
+        if (debugDismiss) {
+            debugDismiss.addEventListener('click', () => {
+                const dbg = document.getElementById('debug-banner');
+                if (dbg) dbg.style.display = 'none';
+            });
+        }
+
         // Load and display leaderboard
         this.displayLeaderboard();
     }
@@ -100,26 +109,71 @@ class SudokuGame {
         }, 1200);
     }
 
+    // helper to show debug messages in UI
+    _showDebugMessage(msg, autoHideMs = 6000) {
+        try {
+            const dbg = document.getElementById('debug-banner');
+            const m = document.getElementById('debug-message');
+            if (dbg && m) {
+                m.textContent = msg;
+                dbg.style.display = 'flex';
+                if (autoHideMs > 0) setTimeout(() => { dbg.style.display = 'none'; }, autoHideMs);
+            }
+        } catch (e) { console.warn('Failed to show debug banner', e); }
+    }
+
     startGame(difficulty) {
         console.log('[SudokuGame] startGame called with difficulty:', difficulty);
+
+        // Guard: ensure generator is available
+        if (!this.generator || typeof this.generator.createPuzzle !== 'function') {
+            console.error('[SudokuGame] generator missing or invalid', this.generator);
+            const messageEl = document.getElementById('game-message');
+            if (messageEl) {
+                messageEl.textContent = 'Error: game engine unavailable. Please reload the page.';
+                messageEl.className = 'message warning';
+            }
+            this._showDebugMessage('Error: game engine unavailable. Please reload the page.', 0);
+            return;
+        }
+
         this.currentDifficulty = difficulty;
-        
-        // Generate puzzle
-        const { puzzle, solution } = this.generator.createPuzzle(difficulty);
-        this.currentPuzzle = puzzle;
-        this.currentSolution = solution;
-        this.userBoard = puzzle.map(row => [...row]);
-        
-        // Setup UI
-        this.showScreen('game-screen');
-        document.getElementById('difficulty-display').textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
-        this.renderBoard();
-        this.startTimer();
-        
-        // Clear message
-        const messageEl = document.getElementById('game-message');
-        messageEl.textContent = '';
-        messageEl.className = 'message';
+
+        try {
+            // Generate puzzle
+            const result = this.generator.createPuzzle(difficulty);
+            // Defensive: verify result shape
+            if (!result || !Array.isArray(result.puzzle) || !Array.isArray(result.solution)) {
+                throw new Error('Invalid puzzle/solution returned from generator');
+            }
+            const { puzzle, solution } = result;
+
+            this.currentPuzzle = puzzle;
+            this.currentSolution = solution;
+            this.userBoard = puzzle.map(row => [...row]);
+
+            // Setup UI
+            this.showScreen('game-screen');
+            const diffEl = document.getElementById('difficulty-display');
+            if (diffEl) diffEl.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+            this.renderBoard();
+            this.startTimer();
+
+            // Clear message
+            const messageEl = document.getElementById('game-message');
+            if (messageEl) {
+                messageEl.textContent = '';
+                messageEl.className = 'message';
+            }
+        } catch (err) {
+            console.error('[SudokuGame] startGame failed:', err);
+            const messageEl = document.getElementById('game-message');
+            if (messageEl) {
+                messageEl.textContent = 'An error occurred while starting the game. See debug banner.';
+                messageEl.className = 'message warning';
+            }
+            this._showDebugMessage('Start failed: ' + (err && err.message ? err.message : String(err)), 0);
+        }
     }
 
     renderBoard() {
@@ -381,6 +435,21 @@ class SudokuGame {
         const timeStr = this.formatTime(this.elapsedTime);
         messageEl.textContent = `🎉 Congratulations! You completed the puzzle in ${timeStr}!`;
         messageEl.className = 'message success';
+    }
+
+    showScreen(screenId) {
+        // Hide all screens
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+        
+        // Show the requested screen
+        const targetScreen = document.getElementById(screenId);
+        if (targetScreen) {
+            targetScreen.classList.add('active');
+        } else {
+            console.warn('[SudokuGame] screen not found:', screenId);
+        }
     }
 
     /* rest of existing methods (startTimer, stopTimer, updateTimerDisplay, formatTime,

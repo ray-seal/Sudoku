@@ -354,3 +354,20 @@ body {
         font-size: 1.1em;
     }
 }
+
+/* Debug banner */
+.debug-banner {
+  max-width: 600px;
+  margin: 12px auto;
+  background: #fff4f4;
+  border: 1px solid #ffcccc;
+  color: #6b1b1b;
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  z-index: 200;
+}
+.debug-banner button { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; }

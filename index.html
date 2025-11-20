@@ -12,14 +12,20 @@
 </head>
 <body>
     <div id="app">
+        <!-- Debug Banner -->
+        <div id="debug-banner" class="debug-banner" role="status" aria-live="polite" style="display:none;">
+            <span id="debug-message"></span>
+            <button id="debug-dismiss" aria-label="Dismiss debug" type="button">×</button>
+        </div>
+        
         <!-- Start Screen -->
         <div id="start-screen" class="screen active">
             <h1>Sudoku</h1>
             <div class="difficulty-buttons">
-                <button type="button" class="difficulty-btn" data-difficulty="easy" onclick="window.startGame && window.startGame('easy')">Easy</button>
-                <button type="button" class="difficulty-btn" data-difficulty="medium" onclick="window.startGame && window.startGame('medium')">Medium</button>
-                <button type="button" class="difficulty-btn" data-difficulty="hard" onclick="window.startGame && window.startGame('hard')">Hard</button>
-                <button type="button" class="difficulty-btn" data-difficulty="expert" onclick="window.startGame && window.startGame('expert')">Expert</button>
+                <button type="button" class="difficulty-btn" data-difficulty="easy" onclick="(function(){ if(window.startGame) return window.startGame('easy'); if(typeof SudokuGame === 'function' && !window.__sudoku){ window.__sudoku = new SudokuGame(); if(window.__sudoku && typeof window.__sudoku.startGame==='function'){ return window.__sudoku.startGame('easy'); }} const dbg = document.getElementById('debug-banner'); const msg = document.getElementById('debug-message'); if(dbg && msg){ msg.textContent = 'App not fully loaded. Try refreshing or wait a moment.'; dbg.style.display = 'block'; } })()">Easy</button>
+                <button type="button" class="difficulty-btn" data-difficulty="medium" onclick="(function(){ if(window.startGame) return window.startGame('medium'); if(typeof SudokuGame === 'function' && !window.__sudoku){ window.__sudoku = new SudokuGame(); if(window.__sudoku && typeof window.__sudoku.startGame==='function'){ return window.__sudoku.startGame('medium'); }} const dbg = document.getElementById('debug-banner'); const msg = document.getElementById('debug-message'); if(dbg && msg){ msg.textContent = 'App not fully loaded. Try refreshing or wait a moment.'; dbg.style.display = 'block'; } })()">Medium</button>
+                <button type="button" class="difficulty-btn" data-difficulty="hard" onclick="(function(){ if(window.startGame) return window.startGame('hard'); if(typeof SudokuGame === 'function' && !window.__sudoku){ window.__sudoku = new SudokuGame(); if(window.__sudoku && typeof window.__sudoku.startGame==='function'){ return window.__sudoku.startGame('hard'); }} const dbg = document.getElementById('debug-banner'); const msg = document.getElementById('debug-message'); if(dbg && msg){ msg.textContent = 'App not fully loaded. Try refreshing or wait a moment.'; dbg.style.display = 'block'; } })()">Hard</button>
+                <button type="button" class="difficulty-btn" data-difficulty="expert" onclick="(function(){ if(window.startGame) return window.startGame('expert'); if(typeof SudokuGame === 'function' && !window.__sudoku){ window.__sudoku = new SudokuGame(); if(window.__sudoku && typeof window.__sudoku.startGame==='function'){ return window.__sudoku.startGame('expert'); }} const dbg = document.getElementById('debug-banner'); const msg = document.getElementById('debug-message'); if(dbg && msg){ msg.textContent = 'App not fully loaded. Try refreshing or wait a moment.'; dbg.style.display = 'block'; } })()">Expert</button>
             </div>
             <div class="leaderboard-section">
                 <h2>Leaderboard</h2>
