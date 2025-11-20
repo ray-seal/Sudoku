@@ -264,7 +264,7 @@ body {
     margin-top: 20px;
 }
 
-.number-btn {
+.num-btn {
     padding: 15px;
     font-size: 1.3em;
     font-weight: bold;
@@ -277,17 +277,17 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.number-btn:hover {
+.num-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.number-btn:active {
+.num-btn:active {
     transform: translateY(0);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.number-btn.clear-btn {
+.num-btn.clear-btn {
     grid-column: span 2;
     background: linear-gradient(135deg, #6c757d, #5a6268);
 }
@@ -349,7 +349,7 @@ body {
         font-size: 1em;
     }
 
-    .number-btn {
+    .num-btn {
         padding: 12px;
         font-size: 1.1em;
     }
