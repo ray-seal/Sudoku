@@ -15,19 +15,37 @@ class SudokuGame {
     }
 
     initializeApp() {
-        // Setup start screen
-        document.querySelectorAll('.difficulty-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const difficulty = e.target.dataset.difficulty;
+        console.log('[SudokuGame] initializing');
+        
+        // Setup start screen with event delegation
+        const container = document.querySelector('.difficulty-buttons');
+        if (container) {
+            container.addEventListener('click', (e) => {
+                const btn = e.target.closest('.difficulty-btn');
+                if (!btn) return;
+                const difficulty = btn.dataset.difficulty;
+                console.log('[SudokuGame] difficulty clicked (delegation):', difficulty);
                 this.startGame(difficulty);
             });
-        });
+        } else {
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.type = 'button';
+                btn.addEventListener('click', () => {
+                    const difficulty = btn.dataset.difficulty;
+                    console.log('[SudokuGame] difficulty clicked (direct):', difficulty);
+                    this.startGame(difficulty);
+                });
+            });
+        }
 
-        // Setup back button
-        document.getElementById('back-btn').addEventListener('click', () => {
-            this.stopTimer();
-            this.showScreen('start-screen');
-        });
+        // Setup back button with guard
+        const backBtn = document.getElementById('back-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.stopTimer();
+                this.showScreen('start-screen');
+            });
+        }
 
         // Setup keyboard input
         document.addEventListener('keydown', (e) => {
@@ -45,6 +63,7 @@ class SudokuGame {
     }
 
     startGame(difficulty) {
+        console.log('[SudokuGame] startGame called with difficulty:', difficulty);
         this.currentDifficulty = difficulty;
         
         // Generate puzzle
